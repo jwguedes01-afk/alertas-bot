@@ -20,14 +20,19 @@ from dotenv import load_dotenv
 AQUI = Path(__file__).parent
 load_dotenv(AQUI / ".env")
 
-TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
-CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
-DB_PROD = os.environ.get("DATABASE_URL_PROD", "")
-DB_FROTA = os.environ.get("DATABASE_URL_FROTA", "")
+# .strip(): segredo colado com quebra de linha no fim fazia o banco rejeitar a conexao
+def _env(nome, padrao=""):
+    return os.environ.get(nome, padrao).strip()
+
+
+TOKEN = _env("TELEGRAM_TOKEN")
+CHAT_ID = _env("TELEGRAM_CHAT_ID")
+DB_PROD = _env("DATABASE_URL_PROD")
+DB_FROTA = _env("DATABASE_URL_FROTA")
 ESTADO = AQUI / "estado.json"
 
 # Monitor de erros (opcional): so liga se SENTRY_DSN estiver definido.
-SENTRY_DSN = os.environ.get("SENTRY_DSN", "")
+SENTRY_DSN = _env("SENTRY_DSN")
 if SENTRY_DSN:
     import sentry_sdk
 
