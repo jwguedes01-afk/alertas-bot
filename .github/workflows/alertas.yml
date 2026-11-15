@@ -1,0 +1,41 @@
+name: Alertas Telegram
+# Verifica os sistemas e avisa no Telegram SO quando algo cai (e quando volta).
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # a cada 15 min (o GitHub pode atrasar alguns minutos)
+  workflow_dispatch: {}
+concurrency:
+  group: alertas
+  cancel-in-progress: false
+jobs:
+  checar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - run: pip install -r requirements.txt
+      - name: Restaurar estado anterior
+        uses: actions/cache/restore@v4
+        with:
+          path: estado.json
+          key: estado-alertas-nunca-bate
+          restore-keys: estado-alertas-
+      - name: Checar sistemas
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          DATABASE_URL_PROD: ${{ secrets.DATABASE_URL_PROD }}
+          DATABASE_URL_FROTA: ${{ secrets.DATABASE_URL_FROTA }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: python bot.py checar
+      - name: Salvar estado
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: estado.json
+          key: estado-alertas-${{ github.run_id }}
