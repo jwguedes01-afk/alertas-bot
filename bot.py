@@ -36,7 +36,7 @@ SENTRY_DSN = _env("SENTRY_DSN")
 if SENTRY_DSN:
     import sentry_sdk
 
-    sentry_sdk.init(dsn=SENTRY_DSN, send_default_pii=False, traces_sample_rate=0)
+    sentry_sdk.init(dsn=SENTRY_DSN)
 
 # (nome, url, timeout). O Render gratis "dorme": a 1a resposta pode levar ~30 s.
 SITES = [
